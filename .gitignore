@@ -1,0 +1,8 @@
+/.idea/
+
+/hospital-management-system/.vscode/
+
+/hospital-management-system/target/
+
+/hospital-management-system/hospital-management-system.iml
+/hospital-management-system/.env
