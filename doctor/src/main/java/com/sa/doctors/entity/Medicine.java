@@ -1,0 +1,29 @@
+package com.sa.doctors.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Entity
+@Table(name = "medications")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Medicine {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID medicineId;
+
+    private String name;
+
+    public Medicine(UUID medicineId) {
+        this.medicineId = medicineId;
+    }
+
+
+
+}

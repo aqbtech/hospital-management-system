@@ -1,0 +1,17 @@
+spring:
+    application:
+        name: doctor
+
+    datasource:
+        url: jdbc:postgresql://ep-cold-snowflake-a1yzj3nr-pooler.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require
+        username: neondb_owner
+        password: npg_st9mT3Lnzxye
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+            format_sql: true
+
+logging:
+    level:
+        org.hibernate.SQL: DEBUG
