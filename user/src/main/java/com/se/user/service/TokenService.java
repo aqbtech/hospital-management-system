@@ -2,51 +2,43 @@ package com.se.user.service;
 
 import org.springframework.stereotype.Service;
 
-import com.se.user.entity.Token;
+import com.se.user.entity.BlacklistedToken;
 import com.se.user.entity.User;
-import com.se.user.repository.TokenRepository;
-import com.se.user.security.JwtService;
+import com.se.user.repository.BlacklistedTokenRepository;
+import com.se.user.security.IJwtService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Service quản lý các thao tác với token
- */
+import java.time.Instant;
+
+
 @Service
 @RequiredArgsConstructor
-public class TokenService {
-    private final TokenRepository tokenRepository;
-    private final JwtService jwtService;
-
+public class TokenService implements ITokenService {
+    private final IJwtService jwtService;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
+    
     /**
-     * Lưu token mới cho user
-     * @param user User cần lưu token
-     * @param tokenString Chuỗi token
-     * @return Token đã lưu
+     * Thêm token vào danh sách đen (blacklist) khi logout hoặc cần thu hồi token
+     * @param token Token cần blacklist
      */
-    public Token saveUserToken(User user, String tokenString) {
-        var token = Token.builder()
-                .user(user)
-                .token(tokenString)
-                .tokenType(Token.TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
+    @Override
+    public void blacklistToken(String token) {
+        BlacklistedToken blacklistedToken = BlacklistedToken.builder()
+                .token(token)
+                .revokedAt(Instant.now())
                 .build();
-        return tokenRepository.save(token);
+        blacklistedTokenRepository.save(blacklistedToken);
     }
-
+    
     /**
-     * Thu hồi tất cả token hợp lệ của user
-     * @param user User cần thu hồi token
+     * Kiểm tra token có nằm trong blacklist hay không
+     * @param token Token cần kiểm tra
+     * @return true nếu token đã bị blacklist, false nếu không
      */
-    public void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
-        validUserTokens.forEach(token -> {
-            token.revoke();
-        });
-        tokenRepository.saveAll(validUserTokens);
+    @Override
+    public boolean isTokenBlacklisted(String token) {
+        return blacklistedTokenRepository.existsByToken(token);
     }
 
     /**
@@ -54,6 +46,7 @@ public class TokenService {
      * @param user User cần tạo token
      * @return Object chứa access token và refresh token
      */
+    @Override
     public TokenPair generateTokenPair(User user) {
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);

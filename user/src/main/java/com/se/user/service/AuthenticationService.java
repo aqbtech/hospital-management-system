@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import com.se.user.exception.AuthenticationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,7 @@ import com.se.user.entity.User;
 import com.se.user.factory.ProfileFactory;
 import com.se.user.mapper.UserMapper;
 import com.se.user.repository.UserRepository;
-import com.se.user.security.JwtService;
+import com.se.user.security.IJwtService;
 import com.se.user.service.TokenService.TokenPair;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,11 +33,11 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final IJwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final List<ProfileFactory> profileFactories;
-    private final TokenService tokenService;
+    private final ITokenService tokenService;
     
 
     @Transactional
@@ -59,9 +60,8 @@ public class AuthenticationService {
                 .findFirst()
                 .ifPresent(factory -> factory.createProfile(savedUser, request));
 
-        // Tạo và lưu token
+        // stateless JWT
         TokenPair tokenPair = tokenService.generateTokenPair(savedUser);
-        tokenService.saveUserToken(savedUser, tokenPair.accessToken());
 
         // Tạo response
         return AuthResponse.builder()
@@ -75,21 +75,22 @@ public class AuthenticationService {
         // Xác thực user
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        request.getUsername(),
                         request.getPassword()
                 )
         );
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
+        var user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new AuthenticationException("Người dùng không tồn tại"));
 
         // Cập nhật last login
         user.setLastLogin(new Date());
         userRepository.save(user);
 
+        // Ở đây không có header nên ta không thể blacklist token cũ
+        // Trong trường hợp cần, có thể thêm param HttpServletRequest httpRequest vào phương thức này
+        // để lấy token cũ từ header và blacklist
         // Tạo token mới
-        tokenService.revokeAllUserTokens(user);
         TokenPair tokenPair = tokenService.generateTokenPair(user);
-        tokenService.saveUserToken(user, tokenPair.accessToken());
 
         // Tạo response
         return AuthResponse.builder()
@@ -107,22 +108,23 @@ public class AuthenticationService {
     ) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
-        final String userEmail;
+        final String userName;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
         }
         refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
-        if (userEmail != null) {
-            var user = this.userRepository.findByEmail(userEmail)
-                    .orElseThrow();
+        userName = jwtService.extractUsername(refreshToken);
+        if (userName != null) {
+            var user = this.userRepository.findByUsername(userName)
+                    .orElseThrow(() -> new AuthenticationException("Người dùng không tồn tại"));
             if (jwtService.isTokenValid(refreshToken, user)) {
+                // Thêm refresh token hiện tại vào blacklist
+                tokenService.blacklistToken(refreshToken);
+                // Tạo token mới
                 TokenPair tokenPair = tokenService.generateTokenPair(user);
-                tokenService.revokeAllUserTokens(user);
-                tokenService.saveUserToken(user, tokenPair.accessToken());
                 var authResponse = AuthResponse.builder()
                         .accessToken(tokenPair.accessToken())
-                        .refreshToken(refreshToken)
+                        .refreshToken(tokenPair.refreshToken())
                         .user(userMapper.mapToUserDto(user))
                         .build();
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
