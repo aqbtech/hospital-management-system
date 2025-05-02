@@ -61,6 +61,7 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private final String[] publicUrls = {
                 "/auth/**",
+                "/api/v1/auth/**",
                 "/v2/api-docs",
                 "/v3/api-docs",
                 "/v3/api-docs/**",
