@@ -12,23 +12,34 @@ management:
 spring:
     cloud:
         gateway:
-                routes:
-                    - id: user-service
-                      uri: lb://USER-SERVICE
-                      predicates:
-                          - Path=/api/v1/users/**
-                      filters:
-                          - StripPrefix=2
+            # Global filters applied to all routes
+            default-filters:
+                - name: GlobalAuthenticationFilter
+            # Route configurations
+            routes:
+                - id: user-service
+                  uri: lb://USER-SERVICE
+                  predicates:
+                      - Path=/api/v1/users/**, /api/v1/auth/**
+                  filters:
+                      - StripPrefix=2
 
     application:
         name: API-GATEWAY
+
+# JWT Configuration (should match with user service)
+application:
+    security:
+        jwt:
+            secret-key: ${JWT_SECRET_KEY:txqxjdlrvlkibwlqilcwoekzeuafsmfgdoozhggoaxrbcocinttijwzxtgzodghluxkvmynmtiboujvugoyzxxuslswocdqxaxnwsjydccokdqxqmngzpjdmmxfgznyk}
+            expiration: ${JWT_EXPIRATION:86400000} # 1 day in milliseconds
 
 eureka:
     client:
         service-url:
             defaultZone: ${DEFAULT_REGIS:http://localhost:8761/eureka/}
 
-logging:
-    level:
-        org.springframework.cloud.gateway: DEBUG
-        org.springframework.web: DEBUG
+#logging:
+#    level:
+#        org.springframework.cloud.gateway: debug
+#        org.springframework.web: debug

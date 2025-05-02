@@ -1,5 +1,6 @@
 package com.se.user.security;
 
+import com.se.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService implements IJwtService {
@@ -65,6 +67,22 @@ public class JwtService implements IJwtService {
     ) {
         Map<String, Object> claims = new HashMap<>(extraClaims);
         claims.put("jti", UUID.randomUUID().toString());
+        
+        // Add user role and authorities to claims
+        if (userDetails instanceof User) {
+            User user = (User) userDetails;
+            // Add role as a string
+            claims.put("role", user.getRole().name());
+            
+            // Add authorities as a list
+            claims.put("authorities", user.getAuthorities().stream()
+                    .map(authority -> {
+                        Map<String, String> auth = new HashMap<>();
+                        auth.put("authority", authority.getAuthority());
+                        return auth;
+                    })
+                    .collect(Collectors.toList()));
+        }
         
         return Jwts
                 .builder()
