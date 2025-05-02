@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h2 { color: #333; }
+        .table { border-collapse: collapse; width: 100%; }
+        .table td, .table th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+</head>
+<body>
+<h2>Invoice</h2>
+<table class="table">
+    <tr><td>Invoice ID</td><td th:text="${invoice.invoiceId}"></td></tr>
+    <tr><td>Patient ID</td><td th:text="${invoice.patientId}"></td></tr>
+    <tr><td>Patient Name</td><td th:text="${invoice.patientName}"></td></tr>
+    <tr><td>Service Fee</td><td th:text="${invoice.breakdown.serviceFee} + ' VND'"></td></tr>
+    <tr><td>Medicine Fee</td><td th:text="${invoice.breakdown.medicineFee} + ' VND'"></td></tr>
+    <tr><td>Insurance Coverage</td><td th:text="${invoice.breakdown.insuranceCoverage} + ' VND'"></td></tr>
+    <tr><td><strong>Total</strong></td><td><strong th:text="${invoice.total} + ' VND'"></strong></td></tr>
+    <tr><td>Status</td><td th:text="${invoice.status}"></td></tr>
+    <tr><td>Created Date</td><td th:text="${#dates.format(date, 'dd/MM/yyyy')}"></td></tr>
+</table>
+</body>
+</html>
