@@ -1,0 +1,24 @@
+package com.se.appointment.Entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "doctor")
+public class Doctor {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long doctorId;
+    private String name;
+    private String specialty; // Maybe one of these: [CARDIOLOGY, PEDIATRICS, NEUROLOGY]
+
+    @OneToMany(mappedBy = "doctor")
+    private List<Appointment> appointments;
+}
