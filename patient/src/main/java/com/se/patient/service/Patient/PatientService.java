@@ -1,6 +1,7 @@
 package com.se.patient.service.Patient;
 
 import com.se.patient.dto.MedicalRecordDto;
+import com.se.patient.exceptions.AlreadyExistException;
 import com.se.patient.exceptions.ResourceNotFoundException;
 import com.se.patient.model.Patient;
 import com.se.patient.model.MedicalRecord;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +38,12 @@ public class PatientService implements IPatientService{
 
     @Override
     public Patient addPatient(RegisterPatientRequest request) {
+        if (patientRepository.existsByCitizenId(request.getCitizenId())) {
+            throw new AlreadyExistException("Citizen ID already exists");
+        }
+        if (patientRepository.existsByPhone(request.getPhone())) {
+            throw new AlreadyExistException("Phone number already exists");
+        }
         Patient patient = new Patient(
                 request.getCitizenId(),
                 request.getInsuranceId(),
