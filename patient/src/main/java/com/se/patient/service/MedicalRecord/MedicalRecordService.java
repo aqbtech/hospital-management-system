@@ -12,6 +12,7 @@ import com.se.patient.repository.PatientRepository;
 import com.se.patient.request.UpdateMedicalRecordRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class MedicalRecordService implements IMedicalRecordService{
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final MedicalRecordRepository medicalRecordRepository;
+    private final ModelMapper modelMapper;
     @Override
     public MedicalRecord addMedicalRecord(UpdateMedicalRecordRequest request) {
         Patient patient = patientRepository.findById(request.getPatientId()).orElseThrow(
@@ -38,21 +40,7 @@ public class MedicalRecordService implements IMedicalRecordService{
 
     @Override
     public MedicalRecordDto convertoDto(MedicalRecord medicalRecord) {
-        Doctor doctor = medicalRecord.getDoctor();
-        DoctorDto doctorDto = new DoctorDto();
-        doctorDto.setDoctorId(doctor.getDoctorId());
-        doctorDto.setName(doctor.getName());
-        doctorDto.setSpecialty(doctor.getSpecialty());
-
-        MedicalRecordDto dto = new MedicalRecordDto();
-        dto.setRecordId(medicalRecord.getRecordId());
-        dto.setPatientId(medicalRecord.getPatient().getId());
-        dto.setDoctor(doctorDto);
-        dto.setDate(medicalRecord.getDate());
-        dto.setSymptoms(medicalRecord.getSymptoms());
-        dto.setDiagnosis(medicalRecord.getDiagnosis());
-
-        return dto;
+        return modelMapper.map(medicalRecord, MedicalRecordDto.class);
     }
 
 

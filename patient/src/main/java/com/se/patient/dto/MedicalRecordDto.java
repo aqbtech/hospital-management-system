@@ -16,6 +16,4 @@ public class MedicalRecordDto {
     public MedicalRecordDto(Long recordId, String diagnosis, String symptoms, ZonedDateTime date, String name) {
     }
 
-    public MedicalRecordDto() {
-    }
 }

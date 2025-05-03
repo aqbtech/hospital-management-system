@@ -1,12 +1,12 @@
 package com.se.patient.service.Patient;
 
 import com.se.patient.dto.MedicalRecordDto;
-import com.se.patient.exceptions.AlreadyExistException;
 import com.se.patient.exceptions.ResourceNotFoundException;
 import com.se.patient.model.Patient;
 import com.se.patient.model.MedicalRecord;
 import com.se.patient.repository.PatientRepository;
 import com.se.patient.request.RegisterPatientRequest;
+import com.se.patient.service.MedicalRecord.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PatientService implements IPatientService{
     private final PatientRepository patientRepository;
-
+    private final MedicalRecordService medicalRecordService;
     @Override
     public Patient getPatientById(Long id) {
         return patientRepository.findById(id)
@@ -32,13 +32,7 @@ public class PatientService implements IPatientService{
         return patient.getMedicalRecordList().stream()
                 .sorted(Comparator.comparing(MedicalRecord::getDate).reversed())
                 .limit(limit)
-                .map(record -> new MedicalRecordDto(
-                        record.getRecordId(),
-                        record.getDiagnosis(),
-                        record.getSymptoms(),
-                        record.getDate(),
-                        record.getDoctor().getName()
-                ))
+                .map(medicalRecordService::convertoDto)
                 .collect(Collectors.toList());
     }
 
