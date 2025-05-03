@@ -4,7 +4,7 @@ import { refreshTokenAPI } from '../apis/userAPI.js'
 import { setUser, clearUser } from '../redux/slice/userSlice.js'
 import { toast } from 'react-toastify'
 
-const authorizedAxios = axios.create({
+export const authorizedAxios = axios.create({
   baseURL: BASE_URL,
   timeout: 1000 * 60 * 10, // 10 minutes
   withCredentials: false

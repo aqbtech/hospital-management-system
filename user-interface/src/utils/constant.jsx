@@ -19,13 +19,13 @@ export const SIDEBAR_DOCTOR = [
   { text: 'My Profile', icon: <AccountCircleIcon/>, tab: 'myProfile' },
   { text: 'Dashboard', icon: <DashboardIcon/>, tab: 'dashboard' },
   { text: 'My Patients', icon: <PeopleIcon/>, tab: 'myPatients' },
-  { text: 'Prescriptions', icon: <MedicationIcon/>, tab: 'prescriptions' }
+  { role: 'doctor' }
 ]
 
 export const SIDEBAR_PATIENT = [
   { text: 'My Profile', icon: <AccountCircleIcon/>, tab: 'profile' },
-  { text: 'Appointment', icon: <CalendarIcon/>, tab: 'Appointment' },
-  { text: 'Medical Record', icon: <MedicalServicesIcon/>, tab: 'dashboard' }
+  { text: 'Appointment', icon: <CalendarIcon/>, tab: 'appointment' },
+  { text: 'Medical Record', icon: <MedicalServicesIcon/>, tab: 'medical' }
 ]
 
 export const SIDEBAR_ACCOUNTANT = [
