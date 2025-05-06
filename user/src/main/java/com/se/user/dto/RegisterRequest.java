@@ -3,6 +3,7 @@ package com.se.user.dto;
 import com.se.user.entity.PatientProfile;
 import com.se.user.entity.Role;
 import com.se.user.validation.StrongPassword;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,4 +49,13 @@ public class RegisterRequest {
     private String insuranceNumber;
 
     private String emergencyContact;
+
+    // thong tin cho doctor
+    private String specialty;
+
+    private Integer yearsOfExperience;
+
+    private String department;
+
+    private String licenseNumber;
 } 

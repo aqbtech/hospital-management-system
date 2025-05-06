@@ -11,14 +11,15 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "doctor")
+@Table(name = "doctor_profiles")
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long doctorId;
     private String name;
     private String specialty; // Maybe one of these: [CARDIOLOGY, PEDIATRICS, NEUROLOGY]
 
-    @OneToMany(mappedBy = "doctor")
-    private List<Appointment> appointments;
+//    @OneToMany(mappedBy = "doctor")
+//    private List<Appointment> appointments;
 }

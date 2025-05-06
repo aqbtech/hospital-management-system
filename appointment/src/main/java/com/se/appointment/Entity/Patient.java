@@ -11,18 +11,19 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "patient")
+@Table(name = "patient_profiles")
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long patientId;
-    private String firstName;
-    private String lastName;
-    private String dob;
-    private String gender; // Maybe one of these: [MALE, FEMALE, OTHER]
-    private String phone;
-    private String citizenId;
+//    private String firstName;
+//    private String lastName;
+//    private String dob;
+//    private String gender; // Maybe one of these: [MALE, FEMALE, OTHER]
+//    private String phone;
+//    private String citizenId;
 
-    @OneToMany(mappedBy = "patient")
-    private List<Appointment> appointments;
+//    @OneToMany(mappedBy = "patient")
+//    private List<Appointment> appointments;
 }

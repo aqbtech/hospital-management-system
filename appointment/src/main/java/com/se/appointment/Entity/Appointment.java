@@ -21,10 +21,10 @@ public class Appointment {
     private String endTime;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", referencedColumnName = "doctorId")
+    @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", referencedColumnName = "patientId")
+    @JoinColumn(name = "patient_id", referencedColumnName = "id")
     private Patient patient;
 }

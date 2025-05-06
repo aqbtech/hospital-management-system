@@ -26,7 +26,9 @@ public class DoctorProfileFactory implements ProfileFactory {
         var doctorProfile = DoctorProfile.builder()
                 .user(user)
                 .fullName(request.getFullName())
-                .department("Chưa phân khoa")
+                .department(request.getDepartment())
+                .specialty(request.getSpecialty())
+                .yearsOfExperience(request.getYearsOfExperience())
                 .build();
         doctorProfileRepository.save(doctorProfile);
     }

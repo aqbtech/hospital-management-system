@@ -76,26 +76,30 @@ public class RouteConfig {
                 
                 // Appointment routes
                 .route("appointment-status", r -> r
-                        .path("/api/v1/appointment-status")
+                        .path("/appointment/appointment-status")
                         .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("appointment-doctor-status", r -> r
-                        .path("/api/v1/appointment-doctor-status")
+                        .path("/appointment/appointment-doctor-status")
                         .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("book-appointment", r -> r
-                        .path("/api/v1/book-appointment")
+                        .path("/appointment/book-appointment")
                         .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("update-appointment", r -> r
-                        .path("/api/v1/update-appointment")
+                        .path("/appointment/update-appointment")
                         .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
