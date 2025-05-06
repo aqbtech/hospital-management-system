@@ -1,5 +1,6 @@
 package com.se.apigateway.config;
 
+import com.se.apigateway.filter.GlobalAuthenticationFilter;
 import com.se.apigateway.filter.RoleBasedAuthorizationFilter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -10,9 +11,12 @@ import org.springframework.context.annotation.Configuration;
 public class RouteConfig {
 
     private final RoleBasedAuthorizationFilter roleBasedAuthorizationFilter;
+    private final GlobalAuthenticationFilter globalAuthenticationFilter;
 
-    public RouteConfig(RoleBasedAuthorizationFilter roleBasedAuthorizationFilter) {
+    public RouteConfig(RoleBasedAuthorizationFilter roleBasedAuthorizationFilter, 
+                       GlobalAuthenticationFilter globalAuthenticationFilter) {
         this.roleBasedAuthorizationFilter = roleBasedAuthorizationFilter;
+        this.globalAuthenticationFilter = globalAuthenticationFilter;
     }
 
     @Bean
@@ -21,17 +25,35 @@ public class RouteConfig {
                 // Authentication routes (public)
                 .route("auth-login", r -> r
                         .path("/api/v1/auth/login")
+                        .filters(s -> s.stripPrefix(2))
                         .uri("lb://USER-SERVICE"))
                 .route("auth-register", r -> r
                         .path("/api/v1/auth/register")
+                        .filters(s -> s.stripPrefix(2))
+                        .uri("lb://USER-SERVICE"))
+                .route("auth-register", r -> r
+                        .path("/api/v1/auth/signup")
+                        .filters(s -> s.stripPrefix(2))
                         .uri("lb://USER-SERVICE"))
                 .route("auth-refresh-token", r -> r
                         .path("/api/v1/auth/refresh-token")
+                        .filters(s -> s.stripPrefix(2))
                         .uri("lb://USER-SERVICE"))
                 .route("auth-logout", r -> r
                         .path("/api/v1/auth/logout")
+                        .filters(s -> s.stripPrefix(2))
                         .uri("lb://USER-SERVICE"))
-                
+
+                // User routes
+                .route("users", r -> r
+                        .path("/api/v1/users/**")
+                        .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
+                                .filter(roleBasedAuthorizationFilter.apply(
+                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT")))
+                                .stripPrefix(2))
+                        .uri("lb://USER-SERVICE"))
+
                 // Patient Management routes
                 .route("update-medical-record", r -> r
                         .path("/api/v1/update-medical-record")

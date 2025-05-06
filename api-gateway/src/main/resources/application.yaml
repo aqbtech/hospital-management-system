@@ -12,17 +12,16 @@ management:
 spring:
     cloud:
         gateway:
-            # Global filters applied to all routes
-            default-filters:
-                - name: GlobalAuthenticationFilter
+            # Global filters không còn sử dụng GlobalAuthenticationFilter
+            default-filters: []
             # Route configurations
-            routes:
-                - id: user-service
-                  uri: lb://USER-SERVICE
-                  predicates:
-                      - Path=/api/v1/users/**, /api/v1/auth/**
-                  filters:
-                      - StripPrefix=2
+#            routes:
+#                - id: user-service
+#                  uri: lb://USER-SERVICE
+#                  predicates:
+#                      - Path=/api/v1/users/**, /api/v1/auth/**
+#                  filters:
+#                      - StripPrefix=2
 
     application:
         name: API-GATEWAY
@@ -31,7 +30,8 @@ spring:
 application:
     security:
         jwt:
-            secret-key: ${JWT_SECRET_KEY:txqxjdlrvlkibwlqilcwoekzeuafsmfgdoozhggoaxrbcocinttijwzxtgzodghluxkvmynmtiboujvugoyzxxuslswocdqxaxnwsjydccokdqxqmngzpjdmmxfgznyk}
+            # Đảm bảo cùng secret key với User Service
+            secret-key: ${JWT_SECRET_KEY}
             expiration: ${JWT_EXPIRATION:86400000} # 1 day in milliseconds
 
 eureka:
@@ -39,7 +39,9 @@ eureka:
         service-url:
             defaultZone: ${DEFAULT_REGIS:http://localhost:8761/eureka/}
 
-#logging:
-#    level:
-#        org.springframework.cloud.gateway: debug
-#        org.springframework.web: debug
+logging:
+    level:
+        org.springframework.cloud.gateway: DEBUG
+        org.springframework.web: DEBUG
+        org.springframework.security: DEBUG
+        com.se.apigateway: DEBUG

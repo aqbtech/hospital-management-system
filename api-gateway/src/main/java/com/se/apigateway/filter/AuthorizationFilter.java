@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@Component
+// @Component (Tạm thời vô hiệu hóa để tránh xung đột với GlobalAuthenticationFilter)
 public class AuthorizationFilter implements GlobalFilter, Ordered {
 
     private final JwtUtil jwtUtil;
@@ -29,6 +29,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
         this.excludedUrls = List.of(
             "/api/v1/auth/login", 
             "/api/v1/auth/register",
+            "/api/v1/auth/signup",
             "/api/v1/auth/refresh-token"
         );
     }

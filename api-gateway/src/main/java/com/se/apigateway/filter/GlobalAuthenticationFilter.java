@@ -29,6 +29,7 @@ public class GlobalAuthenticationFilter extends AbstractGatewayFilterFactory<Glo
         this.excludedUrls = List.of(
             "/api/v1/auth/login", 
             "/api/v1/auth/register",
+            "/api/v1/auth/signup",
             "/api/v1/auth/refresh-token"
         );
     }
@@ -74,10 +75,14 @@ public class GlobalAuthenticationFilter extends AbstractGatewayFilterFactory<Glo
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 
             } catch (ExpiredJwtException e) {
+                System.out.println("Token Expired: " + e.getMessage());
                 return onError(exchange, HttpStatus.UNAUTHORIZED, "Token expired");
             } catch (MalformedJwtException | SignatureException e) {
-                return onError(exchange, HttpStatus.UNAUTHORIZED, "Invalid token");
+                System.out.println("Invalid Token: " + e.getMessage());
+                return onError(exchange, HttpStatus.UNAUTHORIZED, "Invalid token: " + e.getMessage());
             } catch (Exception e) {
+                System.out.println("Exception in GlobalAuthenticationFilter: " + e.getClass().getName() + ": " + e.getMessage());
+                e.printStackTrace();
                 return onError(exchange, HttpStatus.INTERNAL_SERVER_ERROR, "Server error: " + e.getMessage());
             }
         };
