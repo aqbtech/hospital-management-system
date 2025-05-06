@@ -4,13 +4,19 @@ import { Menu as MenuIcon } from '@mui/icons-material'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import Sidebar from './Sidebar'
 import { SIDEBAR_DOCTOR, SIDEBAR_PATIENT, SIDEBAR_ACCOUNTANT } from '../../utils/constant.jsx'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { logoutUserAPI, selectUser } from '../../redux/slice/userSlice.js'
+import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
 
-export default function MainLayout({ children }) {
+const MainLayout = ({ children, SIDEBAR }) => {
   const [open, setOpen] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
   const tabFromUrl = searchParams.get('tab') || 'profile'
   const [currentTab, setCurrentTab] = useState(tabFromUrl)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const currentUser = useSelector(selectUser)
 
   const toggleDrawer = () => {
     setOpen(!open)
@@ -22,8 +28,12 @@ export default function MainLayout({ children }) {
   }
 
   const handleLogout = () => {
-    console.log('Logout')
-    // Thực hiện chức năng logout ở đây
+    const data = { refreshToken: currentUser?.user?.token }
+    toast.promise(dispatch(logoutUserAPI(data)), {
+      pending: 'logging out...'
+    }).then(() => {
+      navigate('/')
+    })
   }
 
   useEffect(() => {
@@ -54,7 +64,7 @@ export default function MainLayout({ children }) {
       </AppBar>
 
       <Sidebar
-        menuItems={SIDEBAR_DOCTOR}
+        menuItems={SIDEBAR}
         open={open}
         toggleDrawer={toggleDrawer}
         onLogout={handleLogout}
@@ -68,3 +78,5 @@ export default function MainLayout({ children }) {
     </Box>
   )
 }
+
+export default MainLayout

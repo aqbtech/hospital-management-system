@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
+import Header from '../../components/layout/Header'
 
 const Auth = () => {
   const location = useLocation()
@@ -9,6 +10,7 @@ const Auth = () => {
 
   return (
     <>
+      <Header />
       {isLogin && <LoginForm /> }
       {isRegister && <RegisterForm />}
     </>
