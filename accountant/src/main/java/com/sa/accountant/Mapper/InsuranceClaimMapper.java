@@ -1,7 +1,8 @@
-package com.se.user.Accountant.Mapper;
+package com.sa.accountant.Mapper;
 
-import com.se.user.Accountant.Entity.InsuranceClaim;
-import com.se.user.Accountant.Response.InsuranceClaimRes;
+
+import com.sa.accountant.Entity.InsuranceClaim;
+import com.sa.accountant.Response.InsuranceClaimRes;
 import org.springframework.stereotype.Component;
 
 @Component

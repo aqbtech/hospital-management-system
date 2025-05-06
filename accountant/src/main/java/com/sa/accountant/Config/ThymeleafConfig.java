@@ -1,4 +1,4 @@
-package com.se.user.Accountant.Config;
+package com.sa.accountant.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,8 @@
-package com.se.user.Accountant.Repository;
+package com.sa.accountant.Repository;
 
-import com.se.user.Accountant.Entity.InsuranceClaim;
 
+
+import com.sa.accountant.Entity.InsuranceClaim;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

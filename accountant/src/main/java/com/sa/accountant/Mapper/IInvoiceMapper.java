@@ -1,7 +1,8 @@
-package com.se.user.Accountant.Mapper;
+package com.sa.accountant.Mapper;
 
-import com.se.user.Accountant.Entity.Invoice;
-import com.se.user.Accountant.Response.InvoiceRes;
+
+import com.sa.accountant.Entity.Invoice;
+import com.sa.accountant.Response.InvoiceRes;
 
 public interface IInvoiceMapper {
     InvoiceRes entityToInvoiceRes(Invoice invoice);

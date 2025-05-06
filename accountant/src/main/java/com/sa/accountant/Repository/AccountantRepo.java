@@ -1,6 +1,7 @@
-package com.se.user.Accountant.Repository;
+package com.sa.accountant.Repository;
 
-import com.se.user.Accountant.Entity.Accountant;
+
+import com.sa.accountant.Entity.Accountant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

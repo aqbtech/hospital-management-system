@@ -1,10 +1,10 @@
-package com.se.user.Accountant.Service;
+package com.sa.accountant.Service;
 
-import com.se.user.Accountant.Entity.Accountant;
-import com.se.user.Accountant.Entity.Qualification;
-import com.se.user.Accountant.Interface.IAccountant;
-import com.se.user.Accountant.Repository.AccountantRepo;
-import com.se.user.Accountant.Request.UpdateProfileReq;
+import com.sa.accountant.Entity.Accountant;
+import com.sa.accountant.Entity.Qualification;
+import com.sa.accountant.Interface.IAccountant;
+import com.sa.accountant.Repository.AccountantRepo;
+import com.sa.accountant.Request.UpdateProfileReq;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.se.user.Accountant.Request;
+package com.sa.accountant.Request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

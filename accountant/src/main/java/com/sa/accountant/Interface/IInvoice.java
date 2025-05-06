@@ -1,6 +1,8 @@
-package com.se.user.Accountant.Interface;
+package com.sa.accountant.Interface;
 
-import com.se.user.Accountant.Response.InvoiceRes;
+
+
+import com.sa.accountant.Response.InvoiceRes;
 
 import java.util.Date;
 import java.util.List;

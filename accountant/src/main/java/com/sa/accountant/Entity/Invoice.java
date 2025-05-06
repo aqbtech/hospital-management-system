@@ -1,4 +1,4 @@
-package com.se.user.Accountant.Entity;
+package com.sa.accountant.Entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

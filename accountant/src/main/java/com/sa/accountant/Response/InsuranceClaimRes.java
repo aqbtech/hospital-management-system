@@ -1,4 +1,4 @@
-package com.se.user.Accountant.Response;
+package com.sa.accountant.Response;
 
 
 import lombok.AccessLevel;

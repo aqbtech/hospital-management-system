@@ -1,4 +1,4 @@
-package com.se.user.Accountant.Interface;
+package com.sa.accountant.Interface;
 
 import java.io.File;
 

@@ -1,11 +1,12 @@
-package com.se.user.Accountant.Service;
+package com.sa.accountant.Service;
 
-import com.se.user.Accountant.Entity.InsuranceClaim;
-import com.se.user.Accountant.Interface.IInsuranceClaim;
-import com.se.user.Accountant.Mapper.IInsuranceClaimMapper;
-import com.se.user.Accountant.Repository.InsuranceClaimRepo;
-import com.se.user.Accountant.Request.ReconcileReq;
-import com.se.user.Accountant.Response.InsuranceClaimRes;
+
+import com.sa.accountant.Entity.InsuranceClaim;
+import com.sa.accountant.Interface.IInsuranceClaim;
+import com.sa.accountant.Mapper.IInsuranceClaimMapper;
+import com.sa.accountant.Repository.InsuranceClaimRepo;
+import com.sa.accountant.Request.ReconcileReq;
+import com.sa.accountant.Response.InsuranceClaimRes;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;

@@ -1,7 +1,9 @@
-package com.se.user.Accountant.Interface;
+package com.sa.accountant.Interface;
 
-import com.se.user.Accountant.Request.ReconcileReq;
-import com.se.user.Accountant.Response.InsuranceClaimRes;
+
+
+import com.sa.accountant.Request.ReconcileReq;
+import com.sa.accountant.Response.InsuranceClaimRes;
 
 import java.util.Date;
 import java.util.List;
