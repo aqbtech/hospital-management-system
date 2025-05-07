@@ -10,8 +10,7 @@ export const loginUserAPI = createAsyncThunk(
   'user/loginUserAPI',
   async (data) => {
     const response = await publicAxios.post('/api/v1/auth/login', data)
-    console.log(response)
-      return response.data
+    return response.data
   }
 )
 
@@ -20,7 +19,7 @@ export const logoutUserAPI = createAsyncThunk(
   'user/logoutUserAPI',
   async (token) => {
     const data = { refreshToken : token }
-    const response = await publicAxios.post('/auth/logout', data)
+    const response = await publicAxios.post('/api/v1/auth/logout', data)
     return response.data
   }
 )

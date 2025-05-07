@@ -39,7 +39,14 @@ export const useLoginForm = () => {
       })
       .then((res) => {
         if (!res.error) {
-          navigate('/patient')
+          console.log(res)
+          if (res.payload.user.role === 'PATIENT') {
+            navigate('/patient')
+          } else if (res.payload.user.role === 'DOCTOR') {
+            navigate('/doctor')
+          } else if (res.payload.user.role === 'ACCOUNTANT') {
+            navigate('/accountant')
+          }
         }
       })
   }

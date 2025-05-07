@@ -62,7 +62,7 @@ public class GetAppointmentDoctorStatus implements IGetAppointmentDoctorStatus {
                 .toList();
 
         List<AvailableDoctorResponse> availableResponses = availableDoctors.stream()
-                .map(doctor -> new AvailableDoctorResponse(doctor.getDoctorId(), slot))
+                .map(doctor -> new AvailableDoctorResponse(doctor.getDoctorId(), slot, doctor.getName()))
                 .toList();
 
         return PaginationUtils.convertListToPage(availableResponses, pageable, availableResponses.size());

@@ -51,7 +51,7 @@ const Appointment = () => {
       pending: 'loading appointment...'
     }).then((res) => {
       console.log(res)
-      setAppointments(res)
+      setAppointments(res.result.content)
     })
   }
   useEffect(() => {
@@ -98,6 +98,7 @@ const Appointment = () => {
       <AppointmentModal
         open={openModal}
         onClose={handleCloseModal}
+        fetchAppointments = { fetchAppointments }
       />
     </Box>
   )

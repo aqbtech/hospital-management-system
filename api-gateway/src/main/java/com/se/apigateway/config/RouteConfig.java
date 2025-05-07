@@ -23,7 +23,7 @@ public class RouteConfig {
     private final GlobalAuthenticationFilter globalAuthenticationFilter;
     private final AppointmentFilter appointmentFilter;
 
-    public RouteConfig(RoleBasedAuthorizationFilter roleBasedAuthorizationFilter, 
+    public RouteConfig(RoleBasedAuthorizationFilter roleBasedAuthorizationFilter,
                        GlobalAuthenticationFilter globalAuthenticationFilter,
                        AppointmentFilter appointmentFilter) {
         this.roleBasedAuthorizationFilter = roleBasedAuthorizationFilter;
@@ -105,7 +105,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://MEDICAL-RECORD-SERVICE"))
-                
+
                 // Appointment routes
                 .route("appointment-status", r -> r
                         .path("/appointment/appointment-status")
@@ -118,10 +118,10 @@ public class RouteConfig {
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("appointment-doctor-status", r -> r
                         .path("/appointment/appointment-doctor-status")
-//                        .filters(f -> f
-//                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
-//                                .filter(roleBasedAuthorizationFilter.apply(
-//                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
+                        .filters(f -> f
+                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
+                                .filter(roleBasedAuthorizationFilter.apply(
+                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("book-appointment", r -> r
                         .path("/appointment/book-appointment")
@@ -137,7 +137,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
-                
+
                 // Payment routes
                 .route("generate-invoice", r -> r
                         .path("/api/v1/generate-invoice")
@@ -157,7 +157,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "ACCOUNTANT"))))
                         .uri("lb://BILLING-SERVICE"))
-                
+
                 // Admin routes
                 .route("admin-profile", r -> r
                         .path("/api/v1/admin/profile")
@@ -165,7 +165,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN"))))
                         .uri("lb://USER-SERVICE"))
-                
+
                 // Doctor routes
                 .route("doctor-profile", r -> r
                         .path("/api/v1/doctor/profile")
@@ -173,7 +173,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR"))))
                         .uri("lb://USER-SERVICE"))
-                
+
                 // Patient routes
                 .route("patient-profile", r -> r
                         .path("/api/v1/patient/profile")
@@ -181,7 +181,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://USER-SERVICE"))
-                
+
                 // Prescription routes
                 .route("prescriptions", r -> r
                         .path("/api/v1/prescriptions/**")
@@ -189,7 +189,7 @@ public class RouteConfig {
                                 .filter(roleBasedAuthorizationFilter.apply(
                                         new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://PRESCRIPTION-SERVICE"))
-                
+
                 // Legacy/Compatibility routes - to ensure backward compatibility
                 .route("legacy-routes", r -> r
                         .path("/api/v1/users/**")
@@ -203,7 +203,7 @@ public class RouteConfig {
                 .route("legacy-billing", r -> r
                         .path("/api/v1/billing/**")
                         .uri("lb://BILLING-SERVICE"))
-                
+
                 .build();
     }
 }

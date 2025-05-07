@@ -4,7 +4,7 @@ import { cancelAppointmentAPI } from '../../apis/appointmentAPI'
 import { toast } from 'react-toastify'
 
 const AppointmentItem = ({ appointment }) => {
-  const [status, setStatus] = useState(appointment.status)
+  const [status, setStatus] = useState('CONFIRMED')
 
   const handleCancel = async () => {
     if (window.confirm('Are you sure you want to cancel this appointment?')) {
@@ -50,7 +50,7 @@ const AppointmentItem = ({ appointment }) => {
 
         {/* Doctor Name */}
         <Typography variant="h6" color="text.primary" fontWeight={600}>
-          Dr. {appointment.doctorName}
+          {appointment.doctorName}
         </Typography>
 
         {/* Date & Time */}
@@ -71,19 +71,6 @@ const AppointmentItem = ({ appointment }) => {
           </Box>
         </Typography>
       </Stack>
-
-      {/* Cancel Button */}
-      <Button
-        variant="contained"
-        disabled={status!=='PENDING'}
-        color="error"
-        size="small"
-        onClick={handleCancel}
-        sx={{ alignSelf: 'flex-start', mt: 2 }}
-      >
-          Cancel
-      </Button>
-
     </Paper>
   )
 }

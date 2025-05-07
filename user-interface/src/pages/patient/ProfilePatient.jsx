@@ -1,23 +1,24 @@
 import { Avatar, Box, Card, CardContent, Divider, Grid, Typography, TextField, Button } from '@mui/material'
 import useProfilePatient from '../../hooks/useProfilePatient'
 
-const getInitials = (firstName, lastName) => {
-  return `${firstName[0]}${lastName[0]}`.toUpperCase()
+const getInitials = (fullName) => {
+  const names = fullName.split(' ')
+  return names.length >= 2 ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase() : names[0][0].toUpperCase()
 }
 
 const ProfilePatient = () => {
   const {
-    staffInfo,
+    userInfo,
     isEditing,
-    tempStaffInfo,
+    tempUserInfo,
     handleEdit,
     handleCancel,
     handleSave,
     handleInputChange
   } = useProfilePatient()
 
-  const { identity, personalInfo } = staffInfo
-  const { firstName, lastName } = personalInfo
+  const { username, email, phone, profile } = userInfo
+  const { fullName, gender, address, insuranceNumber } = profile
 
   return (
     <Box>
@@ -29,8 +30,7 @@ const ProfilePatient = () => {
       <Card elevation={3} sx={{ maxWidth: 1000, width: '100%', mx: 'auto', p: 3, borderRadius: 3 }}>
         <CardContent>
           <Grid container spacing={16} alignItems="center" justifyContent="center">
-            {/* Avatar + Tên */}
-            <Grid item xs={12}	md={4} textAlign="center">
+            <Grid item xs={12} md={4} textAlign="center">
               <Avatar
                 sx={{
                   bgcolor: 'primary.main',
@@ -40,29 +40,21 @@ const ProfilePatient = () => {
                   margin: '0 auto'
                 }}
               >
-                {getInitials(firstName, lastName)}
+                {getInitials(fullName)}
               </Avatar>
 
               <Typography variant="h4" mt={2} fontWeight={700}>
                 {isEditing ? (
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextField
-                      variant="outlined"
-                      name="personalInfo.firstName"
-                      value={tempStaffInfo.personalInfo.firstName}
-                      onChange={handleInputChange}
-                      size="small"
-                    />
-                    <TextField
-                      variant="outlined"
-                      name="personalInfo.lastName"
-                      value={tempStaffInfo.personalInfo.lastName}
-                      onChange={handleInputChange}
-                      size="small"
-                    />
-                  </Box>
+                  <TextField
+                    variant="outlined"
+                    name="profile.fullName"
+                    value={tempUserInfo.profile.fullName}
+                    onChange={handleInputChange}
+                    size="small"
+                    fullWidth
+                  />
                 ) : (
-                  `${firstName} ${lastName}`
+                  fullName
                 )}
               </Typography>
 
@@ -71,111 +63,58 @@ const ProfilePatient = () => {
               </Typography>
             </Grid>
 
-            {/* Thông tin chi tiết */}
             <Grid item xs={12} md={8}>
               <Box display="flex" flexDirection="column" gap={3}>
-                {/* Personal Information */}
+                {/* Basic Info */}
                 <Box>
                   <Typography variant="h6" color="primary" gutterBottom>
-                    Personal Information
+                    Account Information
                   </Typography>
                   <Box display="flex" flexDirection="column" gap={2}>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Date of Birth:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="personalInfo.dob"
-                          type="date"
-                          value={tempStaffInfo.personalInfo.dob}
-                          onChange={handleInputChange}
-                          size="small"
-                        />
-                      ) : (
-                        personalInfo.dob
-                      )}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Gender:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="personalInfo.gender"
-                          value={tempStaffInfo.personalInfo.gender}
-                          onChange={handleInputChange}
-                          size="small"
-                        />
-                      ) : (
-                        personalInfo.gender
-                      )}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Phone:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="personalInfo.phone"
-                          value={tempStaffInfo.personalInfo.phone}
-                          onChange={handleInputChange}
-                          size="small"
-                        />
-                      ) : (
-                        personalInfo.phone
-                      )}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Address:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="personalInfo.address"
-                          value={tempStaffInfo.personalInfo.address}
-                          onChange={handleInputChange}
-                          size="small"
-                          fullWidth
-                        />
-                      ) : (
-                        personalInfo.address
-                      )}
-                    </Typography>
+                    {['username', 'email', 'phone'].map((field) => (
+                      <Typography key={field} variant="body1" color="text.secondary">
+                        <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong>{' '}
+                        {isEditing ? (
+                          <TextField
+                            variant="outlined"
+                            name={field}
+                            value={tempUserInfo[field]}
+                            onChange={handleInputChange}
+                            size="small"
+                            fullWidth
+                          />
+                        ) : (
+                          userInfo[field]
+                        )}
+                      </Typography>
+                    ))}
                   </Box>
                 </Box>
                 <Divider />
 
-                {/* Identity Information */}
+                {/* Profile Info */}
                 <Box>
                   <Typography variant="h6" color="primary" gutterBottom>
-                    Identity Information
+                    Profile
                   </Typography>
                   <Box display="flex" flexDirection="column" gap={2}>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Citizen ID:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="identity.citizenId"
-                          value={tempStaffInfo.identity.citizenId}
-                          onChange={handleInputChange}
-                          size="small"
-                        />
-                      ) : (
-                        identity.citizenId
-                      )}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      <strong>Insurance ID:</strong>{' '}
-                      {isEditing ? (
-                        <TextField
-                          variant="outlined"
-                          name="identity.insuranceId"
-                          value={tempStaffInfo.identity.insuranceId}
-                          onChange={handleInputChange}
-                          size="small"
-                        />
-                      ) : (
-                        identity.insuranceId
-                      )}
-                    </Typography>
+                    {['gender', 'address', 'insuranceNumber'].map((field) => (
+                      <Typography key={field} variant="body1" color="text.secondary">
+                        <strong>{field.replace(/([A-Z])/g, ' $1')}:</strong>{' '}
+                        {isEditing ? (
+                          <TextField
+                            variant="outlined"
+                            name={`profile.${field}`}
+                            value={tempUserInfo.profile[field]}
+                            onChange={handleInputChange}
+                            size="small"
+                            fullWidth
+                          />
+                        ) : (
+                          profile[field]
+                        )}
+                      </Typography>
+                    ))}
                   </Box>
                 </Box>
               </Box>
@@ -202,7 +141,6 @@ const ProfilePatient = () => {
         </CardContent>
       </Card>
     </Box>
-
   )
 }
 
