@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 
 const PublicRoute = ({ user }) => {
   if (user) {
-    switch (user.userType) {
+    switch (user.user.role) {
     case 'PATIENT':
       return <Navigate to="/patient" replace />
     case 'DOCTOR':

@@ -73,7 +73,7 @@ public class JwtService implements IJwtService {
             User user = (User) userDetails;
             // Add role as a string
             claims.put("role", user.getRole().name());
-            
+            claims.put("usrId", user.getId());
             // Add authorities as a list
             claims.put("authorities", user.getAuthorities().stream()
                     .map(authority -> {

@@ -13,7 +13,7 @@ export const updateAppointmentAPI = async (data) => {
 
 //unknown
 export const getListAppointmentForPatientsAPI = async () => {
-  const response = await authorizedAxios.get('/appointment')
+  const response = await authorizedAxios.get('/appointment/appointment-status')
   return response.data
 }
 

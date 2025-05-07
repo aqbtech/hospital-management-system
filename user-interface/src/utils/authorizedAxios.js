@@ -19,7 +19,7 @@ export const injectStore = (mainStore) => {
 authorizedAxios.interceptors.request.use(
   (config) => {
     // You can add any request interceptors here if needed
-    const token = axiosReduxStore.getState().user.user?.token
+    const token = axiosReduxStore.getState().user.user?.accessToken
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }

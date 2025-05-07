@@ -9,8 +9,9 @@ const initialState = {
 export const loginUserAPI = createAsyncThunk(
   'user/loginUserAPI',
   async (data) => {
-    const response = await publicAxios.post('/auth/token', data)
-    return response.data
+    const response = await publicAxios.post('/api/v1/auth/login', data)
+    console.log(response)
+      return response.data
   }
 )
 
@@ -38,7 +39,7 @@ export const userSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loginUserAPI.fulfilled, (state, action) => {
-        state.user = action.payload.result
+        state.user = action.payload
       })
       .addCase(logoutUserAPI.fulfilled, (state) => {
         state.user = null

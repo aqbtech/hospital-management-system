@@ -38,23 +38,23 @@ import java.util.List;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Value("${security.cors.allowed-origins}")
-    private String allowedOrigin;
-    @Value("${security.cors.allowed-headers}")
-    private String allowedHeader;
-    @Value("${security.cors.allowed-methods}")
-    private String allowedMethod;
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(allowedOrigin));
-        configuration.setAllowedMethods(Arrays.asList(allowedMethod.split(",")));
-        configuration.setAllowedHeaders(Arrays.asList(allowedHeader.split(",")));
-        configuration.setExposedHeaders(List.of("x-auth-token"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    @Value("${security.cors.allowed-origins}")
+//    private String allowedOrigin;
+//    @Value("${security.cors.allowed-headers}")
+//    private String allowedHeader;
+//    @Value("${security.cors.allowed-methods}")
+//    private String allowedMethod;
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(List.of(allowedOrigin));
+//        configuration.setAllowedMethods(Arrays.asList(allowedMethod.split(",")));
+//        configuration.setAllowedHeaders(Arrays.asList(allowedHeader.split(",")));
+//        configuration.setExposedHeaders(List.of("x-auth-token"));
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -97,8 +97,9 @@ public class SecurityConfig {
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 )
-                .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                .headers(headers -> headers.frameOptions(frameOption -> frameOption.disable()));
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource())
+//               ;);
         return http.build();
     }
 }

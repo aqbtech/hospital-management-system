@@ -1,23 +1,55 @@
 package com.se.apigateway.config;
 
+import com.se.apigateway.filter.AppointmentFilter;
 import com.se.apigateway.filter.GlobalAuthenticationFilter;
 import com.se.apigateway.filter.RoleBasedAuthorizationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class RouteConfig {
 
     private final RoleBasedAuthorizationFilter roleBasedAuthorizationFilter;
     private final GlobalAuthenticationFilter globalAuthenticationFilter;
+    private final AppointmentFilter appointmentFilter;
 
     public RouteConfig(RoleBasedAuthorizationFilter roleBasedAuthorizationFilter, 
-                       GlobalAuthenticationFilter globalAuthenticationFilter) {
+                       GlobalAuthenticationFilter globalAuthenticationFilter,
+                       AppointmentFilter appointmentFilter) {
         this.roleBasedAuthorizationFilter = roleBasedAuthorizationFilter;
         this.globalAuthenticationFilter = globalAuthenticationFilter;
+        this.appointmentFilter = appointmentFilter;
     }
+
+//    @Value("${security.cors.allowed-origins}")
+//    private String allowedOrigin;
+//    @Value("${security.cors.allowed-headers}")
+//    private String allowedHeader;
+//    @Value("${security.cors.allowed-methods}")
+//    private String allowedMethod;
+//    @Bean
+//    public CorsWebFilter corsWebFilter() {
+//        CorsConfiguration corsConfig = new CorsConfiguration();
+//        corsConfig.setAllowCredentials(true);
+//        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // hoặc "*"
+//        corsConfig.setAllowedHeaders(Arrays.asList("*"));
+//        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", corsConfig);
+//
+//        return new CorsWebFilter(source);
+//    }
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
@@ -80,14 +112,16 @@ public class RouteConfig {
                         .filters(f -> f
                                 .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
                                 .filter(roleBasedAuthorizationFilter.apply(
-                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
+                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT")))
+                                .filter(appointmentFilter.apply(new AppointmentFilter.Config()))
+                        )
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("appointment-doctor-status", r -> r
                         .path("/appointment/appointment-doctor-status")
-                        .filters(f -> f
-                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
-                                .filter(roleBasedAuthorizationFilter.apply(
-                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
+//                        .filters(f -> f
+//                                .filter(globalAuthenticationFilter.apply(new GlobalAuthenticationFilter.Config()))
+//                                .filter(roleBasedAuthorizationFilter.apply(
+//                                        new RoleBasedAuthorizationFilter.Config("ADMIN", "DOCTOR", "NURSE", "PATIENT"))))
                         .uri("lb://APPOINTMENT-SERVICE"))
                 .route("book-appointment", r -> r
                         .path("/appointment/book-appointment")

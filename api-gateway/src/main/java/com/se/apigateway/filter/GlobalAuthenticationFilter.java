@@ -68,6 +68,7 @@ public class GlobalAuthenticationFilter extends AbstractGatewayFilterFactory<Glo
                 ServerHttpRequest modifiedRequest = request.mutate()
                     .header("X-User-Username", username)
                     .header("X-User-Role", role)
+                    .header("X-User-Id", jwtUtil.extractUserId(token))
                     .header("X-User-Authorities", String.join(",", authorities))
                     .build();
                 

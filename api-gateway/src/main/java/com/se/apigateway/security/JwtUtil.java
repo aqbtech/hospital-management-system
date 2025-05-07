@@ -29,7 +29,10 @@ public class JwtUtil {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    
+    public String extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("usrId").toString();
+    }
     public String extractRole(String token) {
         Claims claims = extractAllClaims(token);
         

@@ -41,10 +41,10 @@ function App() {
           <Route path='patient' element={<Patient />} />
         </Route>
 
-        <Route element={<PublicRoute user={currentUser} />} >
+        {/*<Route element={<PublicRoute user={currentUser} />} >*/}
           <Route path='/register' element={<Auth />} />
           <Route path='/login' element={<Auth />} />
-        </Route>
+        {/*</Route>*/}
 
 
         {/* LandingPage */}

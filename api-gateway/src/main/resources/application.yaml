@@ -12,6 +12,21 @@ management:
 spring:
     cloud:
         gateway:
+            globalcors:
+                cors-configurations:
+                    '[/**]':
+                        allowed-origins:
+                            - "*"
+                        allowed-methods:
+                            - GET
+                            - POST
+                            - PUT
+                            - DELETE
+                            - OPTIONS
+                            - PATCH
+                        allowed-headers:
+                            - "*"
+#                        allow-credentials: true
             # Global filters không còn sử dụng GlobalAuthenticationFilter
             default-filters: []
             # Route configurations

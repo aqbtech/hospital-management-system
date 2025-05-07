@@ -13,7 +13,7 @@ import {
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import MedicationIcon from '@mui/icons-material/Medication'
 
-export const BASE_URL = 'https://localhost:8080'
+export const BASE_URL = 'http://localhost:8080'
 
 export const SIDEBAR_DOCTOR = [
   { text: 'My Profile', icon: <AccountCircleIcon/>, tab: 'myProfile' },

@@ -2,7 +2,7 @@ import { authorizedAxios } from '../utils/authorizedAxios'
 
 
 export const getProfilePatientAPI = async () => {
-  const response = await authorizedAxios.get('/patient/profile')
+  const response = await authorizedAxios.get('/api/v1/users/me')
   return response.data
 }
 
@@ -24,6 +24,6 @@ export const viewMedicalHistoryAPI = async (patientId) => {
 
 //bonuss
 export const updateProfilePatientAPI = async (data) => {
-  const response = await authorizedAxios.post('/profile-patient', data)
+  const response = await authorizedAxios.post('/api/v1/users/me', data)
   return response.data
 }
