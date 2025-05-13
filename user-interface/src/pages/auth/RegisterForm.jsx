@@ -60,17 +60,31 @@ const RegisterForm = () => {
           </Box>
 
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <FormControl
+            <TextField
               fullWidth
+              label="Username"
+              {...register('username')}
+              error={!!errors.username}
+              helperText={errors.username?.message}
               sx={{ mb: 2 }}
-              error={!!errors.userType}
-            >
-              <InputLabel id="user-type-label">User Type</InputLabel>
+            />
+
+            <TextField
+              fullWidth
+              label="Full Name"
+              {...register('fullName')}
+              error={!!errors.fullName}
+              helperText={errors.fullName?.message}
+              sx={{ mb: 2 }}
+            />
+
+            <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.role}>
+              <InputLabel id="role-label">Role</InputLabel>
               <Select
-                labelId="user-type-label"
-                label="User Type"
+                labelId="role-label"
+                label="Role"
                 defaultValue=""
-                {...register('userType')}
+                {...register('role')}
               >
                 {USER_TYPES.map((type) => (
                   <MenuItem key={type} value={type}>
@@ -78,25 +92,33 @@ const RegisterForm = () => {
                   </MenuItem>
                 ))}
               </Select>
-              <FormHelperText>{errors.userType?.message}</FormHelperText>
+              <FormHelperText>{errors.role?.message}</FormHelperText>
             </FormControl>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <TextField
-                fullWidth
-                label="First Name"
-                {...register('firstName')}
-                error={!!errors.firstName}
-                helperText={errors.firstName?.message}
-              />
-              <TextField
-                fullWidth
-                label="Last Name"
-                {...register('lastName')}
-                error={!!errors.lastName}
-                helperText={errors.lastName?.message}
-              />
-            </Box>
+            <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.gender}>
+              <InputLabel id="gender-label">Gender</InputLabel>
+              <Select
+                labelId="gender-label"
+                label="Gender"
+                defaultValue=""
+                {...register('gender')}
+              >
+                <MenuItem value="MALE">Male</MenuItem>
+                <MenuItem value="FEMALE">Female</MenuItem>
+              </Select>
+              <FormHelperText>{errors.gender?.message}</FormHelperText>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Date of Birth"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              {...register('dob')}
+              error={!!errors.dob}
+              helperText={errors.dob?.message}
+              sx={{ mb: 2 }}
+            />
 
             <TextField
               fullWidth
@@ -118,10 +140,28 @@ const RegisterForm = () => {
 
             <TextField
               fullWidth
-              label="Citizen ID"
-              {...register('citizenId')}
-              error={!!errors.citizenId}
-              helperText={errors.citizenId?.message}
+              label="Address"
+              {...register('address')}
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Insurance Number"
+              {...register('insuranceNumber')}
+              error={!!errors.insuranceNumber}
+              helperText={errors.insuranceNumber?.message}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Emergency Contact"
+              {...register('emergencyContact')}
+              error={!!errors.emergencyContact}
+              helperText={errors.emergencyContact?.message}
               sx={{ mb: 2 }}
             />
 

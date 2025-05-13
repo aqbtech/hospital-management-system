@@ -44,12 +44,12 @@ public class SecurityConfig {
 //    private String allowedHeader;
 //    @Value("${security.cors.allowed-methods}")
 //    private String allowedMethod;
-//    @Bean
+//   @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {
 //        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of(allowedOrigin));
-//        configuration.setAllowedMethods(Arrays.asList(allowedMethod.split(",")));
-//        configuration.setAllowedHeaders(Arrays.asList(allowedHeader.split(",")));
+//        configuration.setAllowedOrigins(List.of("*"));
+//        configuration.setAllowedMethods(List.of("*"));
+//        configuration.setAllowedHeaders(List.of("*"));
 //        configuration.setExposedHeaders(List.of("x-auth-token"));
 //        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 //        source.registerCorsConfiguration("/**", configuration);

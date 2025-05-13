@@ -11,4 +11,5 @@ import lombok.Data;
 public class AvailableDoctorResponse {
     private Long doctorId;
     private Slot slot;
+    private String doctorName;
 }

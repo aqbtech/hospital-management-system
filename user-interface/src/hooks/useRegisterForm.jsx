@@ -4,9 +4,11 @@ import * as yup from 'yup'
 import { registerUserAPI } from '../apis/userAPI'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-import { PHONENUMBER_RULE,
+import {
+  PHONENUMBER_RULE,
   PHONENUMBER_RULE_MESSAGE,
-  EMAIL_RULE, EMAIL_RULE_MESSAGE,
+  EMAIL_RULE,
+  EMAIL_RULE_MESSAGE,
   PASSWORD_RULE,
   PASSWORD_RULE_MESSAGE,
   FIELD_REQUIRED_MESSAGE
@@ -14,19 +16,21 @@ import { PHONENUMBER_RULE,
 import { USER_TYPES } from '../utils/constant'
 
 const schema = yup.object().shape({
-  userType: yup.string()
-    .oneOf(USER_TYPES, 'Invalid user type')
-    .required('User type is required'),
-  firstName: yup.string().required(FIELD_REQUIRED_MESSAGE),
-  lastName: yup.string().required(FIELD_REQUIRED_MESSAGE),
+  username: yup.string().required(FIELD_REQUIRED_MESSAGE),
   email: yup.string().matches(EMAIL_RULE, EMAIL_RULE_MESSAGE).required(FIELD_REQUIRED_MESSAGE),
-  phone: yup.string().matches(PHONENUMBER_RULE, PHONENUMBER_RULE_MESSAGE).required(FIELD_REQUIRED_MESSAGE),
-  citizenId: yup.string().required(FIELD_REQUIRED_MESSAGE),
   password: yup.string().matches(PASSWORD_RULE, PASSWORD_RULE_MESSAGE).required(FIELD_REQUIRED_MESSAGE),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('password'), null], 'Passwords do not match')
-    .required('Please confirm your password')
+    .required('Please confirm your password'),
+  phone: yup.string().matches(PHONENUMBER_RULE, PHONENUMBER_RULE_MESSAGE).required(FIELD_REQUIRED_MESSAGE),
+  fullName: yup.string().required(FIELD_REQUIRED_MESSAGE),
+  role: yup.string().oneOf(USER_TYPES, 'Invalid role').required('Role is required'),
+  gender: yup.string().oneOf(['MALE', 'FEMALE'], 'Invalid gender').required('Gender is required'),
+  dob: yup.date().required('Date of birth is required'),
+  address: yup.string().required(FIELD_REQUIRED_MESSAGE),
+  insuranceNumber: yup.string().required(FIELD_REQUIRED_MESSAGE),
+  emergencyContact: yup.string().matches(PHONENUMBER_RULE, 'Invalid emergency contact').required(FIELD_REQUIRED_MESSAGE)
 })
 
 export const useRegisterForm = () => {
@@ -44,14 +48,8 @@ export const useRegisterForm = () => {
   const onSubmit = async (data) => {
     const { confirmPassword, ...formData } = data
 
-    const payload = {
-      userType: formData.userType,
-      personalInfo: { ...formData }
-    }
-    delete payload.personalInfo.userType
-
     await toast.promise(
-      registerUserAPI(payload),
+      registerUserAPI(formData),
       {
         pending: 'Creating account...',
         success: 'Account created successfully!'

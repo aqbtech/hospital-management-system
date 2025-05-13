@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react'
 import { getDoctorForTimeAPI } from '../../apis/appointmentAPI'
 import { toast } from 'react-toastify'
 import { bookAppointmentAPI } from '../../apis/appointmentAPI'
+import { useSelector } from 'react-redux'
+import { selectUser } from '../../redux/slice/userSlice'
 
-const AppointmentModal = ({ open, onClose }) => {
+const AppointmentModal = ({ open, onClose, fetchAppointments }) => {
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTime, setSelectedTime] = useState('')
   const [doctors, setDoctors] = useState([
@@ -14,6 +16,8 @@ const AppointmentModal = ({ open, onClose }) => {
   ])
   const [selectedDoctor, setSelectedDoctor] = useState('')
   const [error, setError] = useState('')
+  const currentUser = useSelector(selectUser)
+
 
   useEffect(() => {
     if (selectedDate && selectedTime) {
@@ -25,8 +29,7 @@ const AppointmentModal = ({ open, onClose }) => {
     toast.promise(getDoctorForTimeAPI(selectedDate, selectedTime), {
       pending: 'loading doctor...'
     }).then((res) => {
-      console.log(res)
-      setDoctors(res)
+      setDoctors(res.result.content)
     })
   }
 
@@ -51,9 +54,9 @@ const AppointmentModal = ({ open, onClose }) => {
     const [hour, minute] = selectedTime.split(':').map(Number)
     const endHour = (hour + 1) % 24
     const endTime = `${endHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-
+    console.log(currentUser)
     const appointmentData = {
-      patientId: 1234,
+      patientId: currentUser.user.id,
       doctorId: selectedDoctor,
       slot: {
         date: selectedDate,
@@ -61,11 +64,11 @@ const AppointmentModal = ({ open, onClose }) => {
         endTime: endTime
       }
     }
-    console.log('Booking appointment:', appointmentData)
     toast.promise(bookAppointmentAPI(appointmentData), {
       pending: 'booking appointment...',
       success: 'book appointment success'
     }).then(() => {
+      fetchAppointments()
       handleClose()
     })
   }
@@ -150,7 +153,7 @@ const AppointmentModal = ({ open, onClose }) => {
           >
             {doctors.map((doctor) => (
               <MenuItem key={doctor.doctorId} value={doctor.doctorId}>
-                  Dr. {doctor.doctorName}
+                {doctor.doctorName}
               </MenuItem>
             ))}
           </Select>

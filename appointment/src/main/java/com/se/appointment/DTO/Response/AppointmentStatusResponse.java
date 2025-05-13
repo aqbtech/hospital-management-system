@@ -11,4 +11,5 @@ public class AppointmentStatusResponse {
     private Long patientId;
     private Long doctorId;
     private Slot slot;
+    private String doctorName;
 }

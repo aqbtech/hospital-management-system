@@ -23,6 +23,7 @@ authorizedAxios.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   },
   (error) => {
@@ -38,7 +39,7 @@ authorizedAxios.interceptors.response.use(
   },
   async (error) => {
     // Handle response error
-    const token = axiosReduxStore.getState().user.user?.token
+    const token = axiosReduxStore.getState().user.user?.accessToken
     if (error.response?.status === 401 && token) {
       try {
         if (error.config._retry) {
@@ -48,10 +49,10 @@ authorizedAxios.interceptors.response.use(
         error._retry = true
 
         const response = await refreshTokenAPI(token)
-        const newToken = response.result.token
+        const newToken = response.result.accessToken
         if (newToken) {
           const currentUser = axiosReduxStore.getState().user.user
-          axiosReduxStore.dispatch(setUser({ ...currentUser, token: newToken }))
+          axiosReduxStore.dispatch(setUser({ ...currentUser, accessToken: newToken }))
 
           error.config.headers.Authorization = `Bearer ${newToken}`
           return authorizedAxios(error.config)

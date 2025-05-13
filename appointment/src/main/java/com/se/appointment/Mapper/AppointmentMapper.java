@@ -16,6 +16,7 @@ public interface AppointmentMapper {
     @Mapping(target = "patientId", source = "patient.patientId")
     @Mapping(target = "doctorId", source = "doctor.doctorId")
     @Mapping(target = "slot", source = "appointment", qualifiedByName = "mapSlot")
+    @Mapping(target = "doctorName", source = "doctor.name")
     AppointmentStatusResponse toAppointmentStatusResponse(Appointment appointment);
 
     List<AppointmentStatusResponse> toAppointmentStatusResponses(List<Appointment> appointments);
