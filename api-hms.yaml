@@ -1,0 +1,1561 @@
+openapi: 3.0.0
+info:
+  title: Hospital Management System (HMS) API
+  version: 1.0.0
+  description: API for managing hospital operations including patient registration, appointments, payments, and prescriptions.
+
+security:
+  - bearerAuth: []
+
+servers:
+  - url: https://api.hms.example.com/v1
+    description: Production server
+# ------------------- Schema -------------------
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: "INVALID_SLOT"
+        message:
+          type: string
+          example: "Chỗ không đúng"
+        details:
+          type: object
+          nullable: true
+
+    # ------------------- Shared Schemas -------------------
+    PaginatedResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          example: 10
+        totalItems:
+          type: integer
+          example: 100
+        currentPage:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items: {}
+    
+    PaginatedMedicalRecords:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedResponse"
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedicalRecord"
+
+    Patient:
+      type: object
+      properties:
+        patientId:
+          type: integer
+          example: 1234
+        firstName:
+          type: string
+          example: "Minh"
+        lastName:
+          type: string
+          example: "Nguyễn Văn"
+        dob:
+          type: string
+          format: date
+          example: "1990-01-15"
+        gender:
+          type: string
+          enum: [MALE, FEMALE, OTHER]
+        phone:
+          type: string
+          example: "+84901234567"
+        citizenId:
+          type: string
+          example: "001203000001"
+
+    Doctor:
+      type: object
+      properties:
+        doctorId:
+          type: integer
+          example: 0987
+        name:
+          type: string
+          example: "Dr. Nguyễn Văn A"
+        specialty:
+          type: string
+          enum: [CARDIOLOGY, PEDIATRICS, NEUROLOGY]
+
+    DoctorSummary:
+      type: object
+      properties:
+        doctorId:
+          type: integer
+          example: 0987
+        name:
+          type: string
+          example: "Dr. Nguyễn Văn A"
+        specialty:
+          type: string
+          enum: [CARDIOLOGY, PEDIATRICS, NEUROLOGY]
+
+    # ------------------- Patient Service -------------------
+    MedicalRecord:
+      type: object
+      properties:
+        recordId:
+          type: integer
+          example: 5678
+        patientId:
+          type: integer
+          example: 1234
+        doctor:
+          $ref: "#/components/schemas/DoctorSummary"
+        date:
+          type: string
+          format: date-time
+          example: "2023-10-01T10:00:00Z"
+        symptoms:
+          type: string
+          example: "Fever, cough"
+        diagnosis:
+          type: string
+          example: "Flu"
+        
+    
+    PatientRegistrationRequest:
+      type: object
+      required:
+        - identity
+        - personalInfo
+      properties:
+        identity:
+          type: object
+          properties:
+            citizenId:
+              type: string
+            insuranceId:
+              type: string
+              nullable: true
+        personalInfo:
+          $ref: "#/components/schemas/PatientPersonalInfo"
+
+    PatientPersonalInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dob:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [MALE, FEMALE, OTHER]
+        phone:
+          type: string
+        address:
+          type: string
+          nullable: true
+
+    # ------------------- Scheduling Service -------------------
+    AppointmentCreated:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [CONFIRMED, DOCTOR_UNAVAILABLE, INVALID_SLOT]
+        slot:
+          $ref: "#/components/schemas/AppointmentSlot"
+
+    ApointmentStatus:
+        type: object
+        properties:
+          appointmentId: {type: integer, format: int64}
+          patientId: {type: integer, format: int64}
+          doctorId: {type: integer, format: int64}
+          slot:
+            $ref: "#/components/schemas/AppointmentSlot"
+
+    AppointmentSlot:
+      type: object
+      required:
+        - date
+        - startTime
+        - endTime
+      properties:
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+        endTime:
+          type: string
+          pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+
+    UpdateAppointmentRequest:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - slot
+      properties:
+        patientId:
+          type: integer
+          example: 1234
+          nullable: true
+        doctorId:
+          type: integer
+          example: 0987
+          nullable: true
+        slot:
+          $ref: "#/components/schemas/AppointmentSlot"
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - slot
+      properties:
+        patientId:
+          type: integer
+          example: 1234
+        doctorId:
+          type: integer
+          example: 0987
+        slot:
+          $ref: "#/components/schemas/AppointmentSlot"
+
+    # ------------------- Payment Service -------------------
+    PaymentMethodDetails:
+      oneOf:
+        - $ref: "#/components/schemas/BankPayment"
+        - $ref: "#/components/schemas/EWalletPayment"
+        - $ref: "#/components/schemas/InsurancePayment"
+      discriminator:
+        propertyName: type
+        mapping:
+          BANK: "#/components/schemas/BankPayment"
+          E_WALLET: "#/components/schemas/EWalletPayment"
+          INSURANCE: "#/components/schemas/InsurancePayment"
+
+    BankPayment:
+      type: object
+      required:
+        - accountNumber
+        - bankCode
+      properties:
+        type:
+          type: string
+          enum: [BANK]
+          default: BANK
+        accountNumber:
+          type: string
+        bankCode:
+          type: string
+          enum: [VCB, VIB, TCB]
+
+    EWalletPayment:
+      type: object
+      required:
+        - walletType
+        - phone
+      properties:
+        type:
+          type: string
+          enum: [E_WALLET]
+          default: E_WALLET
+        walletType:
+          type: string
+          enum: [MOMO, ZALOPAY]
+        phone:
+          type: string
+
+    InsurancePayment:
+      type: object
+      required:
+        - insuranceProvider
+        - policyNumber
+      properties:
+        type:
+          type: string
+          enum: [INSURANCE]
+          default: INSURANCE
+        insuranceProvider:
+          type: string
+        policyNumber:
+          type: string
+
+# ------------------- API Paths -------------------
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login to the system
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  userType:
+                    type: string
+                    enum: [PATIENT, DOCTOR, NURSE, ADMIN, ACCOUNTANT]
+                  userId:
+                    type: integer
+                    
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userType
+                - personalInfo
+              properties:
+                userType:
+                  type: string
+                  enum: [PATIENT, DOCTOR, NURSE, ADMIN, ACCOUNTANT]
+                personalInfo:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+                    phone:
+                      type: string
+                    citizenId:
+                      type: string
+                    password:
+                      type: string
+                      format: password
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+
+  /update-medical-record:
+    post:
+      tags: [Patient]
+      summary: Update patient medical record
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicalRecord"
+      responses:
+        200:
+          description: Patient record updated successfully
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /register-patients:
+    post:
+      tags: [Patient]
+      summary: Register a new patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientRegistrationRequest"
+      responses:
+        201:
+          description: Patient registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: string
+                    format: uuid
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /view-medicine-hisory:
+    get:
+      tags: [Patient]
+      summary: Retrieve patient history
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          description: The ID of the patient whose history is to be retrieved
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000000
+        - name: limit
+          in: query
+          required: false
+          description: The maximum number of history records to retrieve (default is 10)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        200:
+          description: Patient history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: integer
+                  history:
+                      $ref: "#/components/schemas/PaginatedMedicalRecords"
+        401:
+          description: Unauthorized - Invalid or missing authentication token
+        403:
+          description: Forbidden - Insufficient permissions
+        404:
+          description: Not Found - Patient not found
+        406:
+          description: Not Acceptable - Invalid request format
+        429:
+          description: Too Many Requests - Rate limit exceeded
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /appointment-status:
+    get:
+      summary: Get appointment status
+      tags: [Appointment]
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          description: The ID of the patient whose history is to be retrieved
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000000
+        - name: limit
+          in: query
+          required: false
+          description: The maximum number of history records to retrieve (default is 10)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        200:
+          description: Appointment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApointmentStatus"
+
+  /appointment-doctor-status:
+    get:
+      summary: Get doctor available at time
+      tags: [Appointment]
+      parameters:
+        - name: startTs
+          in: query
+          required: true
+          description: The unix timestamp for start time of query
+          schema:
+            type: integer
+            format: int64
+        - name: endTs
+          in: query
+          required: true
+          description: The unix timestamp for end time of query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Avaibility of doctor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateAppointmentRequest"
+
+  /book-appointment:
+    post:
+      tags: [Appointment]
+      summary: Create a new appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+      responses:
+        201:
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentCreated"
+        409:
+          description: Slot conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conflictDetails:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        existingAppointmentId:
+                          type: string
+                        slot:
+                          $ref: "#/components/schemas/AppointmentSlot"
+
+  /update-appointment:
+    put:
+      summary: Update appointment status
+      tags: [Appointment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+      responses:
+        201:
+          description: Appointment updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appointmentId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [CONFIRMED, DOCTOR_UNAVAILABLE, INVALID_SLOT]
+
+  
+
+
+  /generate-invoice:
+    post:
+      tags: [Payment]
+      summary: Generate invoice for payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - appointmentId
+                - totalAmount
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                appointmentId:
+                  type: string
+                  format: uuid
+                totalAmount:
+                  type: number
+                  format: double
+      responses:
+        200:
+          description: Invoice generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoiceId:
+                    type: string
+                    format: uuid
+  
+  /payments:
+    post:
+      tags: [Payment]
+      summary: Process payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - invoiceId
+                - paymentMethod
+                - paymentDetails
+              properties:
+                invoiceId:
+                  type: string
+                  format: uuid
+                paymentMethod:
+                  type: string
+                  enum: [BANK_TRANSFER, EWALLET, INSURANCE]
+                paymentDetails:
+                  $ref: "#/components/schemas/PaymentMethodDetails"
+      responses:
+        200:
+          description: Payment processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [SUCCESS, FAILED, PENDING]
+                  paymentAmount:
+                    type: number
+                    format: double
+                  breakdown:
+                    type: object
+                    properties:
+                      serviceFee:
+                        type: number
+                      medicineFee:
+                        type: number
+                      insuranceCoverage:
+                        type: number
+                        nullable: true
+        400:
+          description: Invalid payment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /update-billing:
+    post:
+      tags: [Payment]
+      summary: Update Payment billing for tra tien mat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - invoiceId
+                - paymentMethod
+                - paymentDetails
+              properties:
+                invoiceId:
+                  type: string
+                  format: uuid
+                paymentMethod:
+                  type: string
+                  enum: [BANK_TRANSFER, EWALLET, INSURANCE]
+                paymentDetails:
+                  $ref: "#/components/schemas/PaymentMethodDetails"
+      responses:
+        200:
+          description: Payment processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [SUCCESS, FAILED, PENDING]
+                  paymentAmount:
+                    type: number
+                    format: double
+                  breakdown:
+                    type: object
+                    properties:
+                      serviceFee:
+                        type: number
+                      medicineFee:
+                        type: number
+                      insuranceCoverage:
+                        type: number
+                        nullable: true
+        400:
+          description: Invalid payment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /doctors/schedule:
+    get:
+      tags: [Doctor]
+      summary: Get doctor's schedule
+      parameters:
+        - name: doctorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Doctor's schedule retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schedule:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        slots:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              startTime:
+                                type: string
+                                pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+                              endTime:
+                                type: string
+                                pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+                              status:
+                                type: string
+                                enum: [AVAILABLE, BOOKED, COMPLETED]
+
+  /doctors/patients:
+    get:
+      tags: [Doctor]
+      summary: Get doctor's patient list
+      parameters:
+        - name: doctorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [WAITING, IN_PROGRESS, COMPLETED]
+      responses:
+        200:
+          description: Patient list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        patientId:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        status:
+                          type: string
+                          enum: [WAITING, IN_PROGRESS, COMPLETED]
+                        waitingTime:
+                          type: integer
+                          description: Time in minutes
+
+  /doctors/prescriptions:
+    post:
+      tags: [Doctor]
+      summary: Create electronic prescription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - medications
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                medications:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - medicineId
+                      - dosage
+                      - frequency
+                    properties:
+                      medicineId:
+                        type: string
+                        format: uuid
+                      dosage:
+                        type: string
+                      frequency:
+                        type: string
+                      duration:
+                        type: string
+                      notes:
+                        type: string
+      responses:
+        201:
+          description: Prescription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prescriptionId:
+                    type: string
+                    format: uuid
+
+  /doctors/profile:
+    put:
+      tags: [Doctor]
+      summary: Update doctor's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                specialty:
+                  type: string
+                  enum: [CARDIOLOGY, PEDIATRICS, NEUROLOGY]
+                qualifications:
+                  type: array
+                  items:
+                    type: string
+                experience:
+                  type: integer
+      responses:
+        200:
+          description: Profile updated successfully
+
+  /nurses/patient-status:
+    put:
+      tags: [Nurse]
+      summary: Update patient's vital signs and treatment progress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - vitalSigns
+              properties:
+                patientId:
+                  type: string
+                  format: uuid
+                vitalSigns:
+                  type: object
+                  properties:
+                    bloodPressure:
+                      type: string
+                    heartRate:
+                      type: integer
+                    temperature:
+                      type: number
+                    oxygenLevel:
+                      type: integer
+                treatmentProgress:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        200:
+          description: Patient status updated successfully
+
+  /nurses/doctor-orders:
+    get:
+      tags: [Nurse]
+      summary: Get doctor's orders for patients
+      parameters:
+        - name: nurseId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, IN_PROGRESS, COMPLETED]
+      responses:
+        200:
+          description: Doctor's orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        orderId:
+                          type: string
+                          format: uuid
+                        patientId:
+                          type: string
+                          format: uuid
+                        patientName:
+                          type: string
+                        doctorId:
+                          type: string
+                          format: uuid
+                        doctorName:
+                          type: string
+                        type:
+                          type: string
+                          enum: [MEDICATION, IV_FLUID, LAB_TEST]
+                        details:
+                          type: string
+                        status:
+                          type: string
+                          enum: [PENDING, IN_PROGRESS, COMPLETED]
+                        createdAt:
+                          type: string
+                          format: date-time
+
+  /nurses/bed-management:
+    get:
+      tags: [Nurse]
+      summary: Get bed/room availability
+      responses:
+        200:
+          description: Bed availability retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  beds:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bedId:
+                          type: string
+                          format: uuid
+                        roomNumber:
+                          type: string
+                        status:
+                          type: string
+                          enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+                        patientId:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        patientName:
+                          type: string
+                          nullable: true
+    put:
+      tags: [Nurse]
+      summary: Update bed assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bedId
+                - action
+              properties:
+                bedId:
+                  type: string
+                  format: uuid
+                action:
+                  type: string
+                  enum: [ASSIGN, RELEASE, MAINTENANCE]
+                patientId:
+                  type: string
+                  format: uuid
+                  nullable: true
+      responses:
+        200:
+          description: Bed assignment updated successfully
+
+  /nurses/profile:
+    put:
+      tags: [Nurse]
+      summary: Update nurse's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                department:
+                  type: string
+                qualifications:
+                  type: array
+                  items:
+                    type: string
+                experience:
+                  type: integer
+      responses:
+        200:
+          description: Profile updated successfully
+
+  /accountants/invoices:
+    get:
+      tags: [Accountant]
+      summary: Get list of invoices
+      parameters:
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, PAID, CANCELLED]
+      responses:
+        200:
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        invoiceId:
+                          type: string
+                          format: uuid
+                        patientId:
+                          type: string
+                          format: uuid
+                        patientName:
+                          type: string
+                        totalAmount:
+                          type: number
+                        status:
+                          type: string
+                          enum: [PENDING, PAID, CANCELLED]
+                        createdAt:
+                          type: string
+                          format: date-time
+                        breakdown:
+                          type: object
+                          properties:
+                            serviceFee:
+                              type: number
+                            medicineFee:
+                              type: number
+                            insuranceCoverage:
+                              type: number
+                              nullable: true
+
+  /accountants/invoices/{invoiceId}/export:
+    get:
+      tags: [Accountant]
+      summary: Export invoice as PDF
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Invoice PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /accountants/insurance-claims:
+    get:
+      tags: [Accountant]
+      summary: Get insurance claims for reconciliation
+      parameters:
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED]
+      responses:
+        200:
+          description: Insurance claims retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claims:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        claimId:
+                          type: string
+                          format: uuid
+                        patientId:
+                          type: string
+                          format: uuid
+                        patientName:
+                          type: string
+                        insuranceProvider:
+                          type: string
+                        policyNumber:
+                          type: string
+                        amount:
+                          type: number
+                        status:
+                          type: string
+                          enum: [PENDING, APPROVED, REJECTED]
+                        createdAt:
+                          type: string
+                          format: date-time
+
+  /accountants/insurance-claims/{claimId}/reconcile:
+    post:
+      tags: [Accountant]
+      summary: Reconcile insurance claim
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+                - notes
+              properties:
+                status:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+                notes:
+                  type: string
+      responses:
+        200:
+          description: Insurance claim reconciled successfully
+
+  /accountants/profile:
+    put:
+      tags: [Accountant]
+      summary: Update accountant's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                department:
+                  type: string
+                qualifications:
+                  type: array
+                  items:
+                    type: string
+                experience:
+                  type: integer
+      responses:
+        200:
+          description: Profile updated successfully
+
+  /admin/staff-schedule:
+    post:
+      tags: [Admin]
+      summary: Create staff schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - staffId
+                - schedule
+              properties:
+                staffId:
+                  type: string
+                  format: uuid
+                schedule:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - date
+                      - shift
+                    properties:
+                      date:
+                        type: string
+                        format: date
+                      shift:
+                        type: string
+                        enum: [MORNING, AFTERNOON, NIGHT]
+                      notes:
+                        type: string
+      responses:
+        201:
+          description: Staff schedule created successfully
+
+  /admin/performance:
+    get:
+      tags: [Admin]
+      summary: Get staff performance metrics
+      parameters:
+        - name: staffId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Performance metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics:
+                    type: object
+                    properties:
+                      totalPatients:
+                        type: integer
+                      averageRating:
+                        type: number
+                      completedAppointments:
+                        type: integer
+                      cancelledAppointments:
+                        type: integer
+                      averageResponseTime:
+                        type: integer
+                        description: Time in minutes
+
+  /admin/complaints:
+    get:
+      tags: [Admin]
+      summary: Get patient complaints
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, IN_PROGRESS, RESOLVED]
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Complaints retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  complaints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        complaintId:
+                          type: string
+                          format: uuid
+                        patientId:
+                          type: string
+                          format: uuid
+                        patientName:
+                          type: string
+                        subject:
+                          type: string
+                        description:
+                          type: string
+                        status:
+                          type: string
+                          enum: [PENDING, IN_PROGRESS, RESOLVED]
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+
+  /admin/complaints/{complaintId}/update:
+    put:
+      tags: [Admin]
+      summary: Update complaint status
+      parameters:
+        - name: complaintId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+                - notes
+              properties:
+                status:
+                  type: string
+                  enum: [IN_PROGRESS, RESOLVED]
+                notes:
+                  type: string
+      responses:
+        200:
+          description: Complaint status updated successfully
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Get audit logs for medical records
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Audit logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        logId:
+                          type: string
+                          format: uuid
+                        timestamp:
+                          type: string
+                          format: date-time
+                        userId:
+                          type: string
+                          format: uuid
+                        userName:
+                          type: string
+                        action:
+                          type: string
+                          enum: [VIEW, EDIT, CREATE, DELETE]
+                        details:
+                          type: string
+
+  /admin/profile:
+    put:
+      tags: [Admin]
+      summary: Update administrator's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                department:
+                  type: string
+                role:
+                  type: string
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: Profile updated successfully
